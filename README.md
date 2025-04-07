@@ -11,12 +11,42 @@ Telegram бот для отслеживания цен на товары Ozon.
 - Кеширование результатов поиска
 - Статистика запросов
 
-## Установка
+## Запуск с использованием Docker (рекомендуется)
 
 1. Клонируйте репозиторий:
 ```bash
-git clone https://github.com/yourusername/ozon-price-tracker.git
-cd ozon-price-tracker
+git clone https://github.com/Allexndr/Ozon_parser.git
+cd Ozon_parser
+```
+
+2. Создайте файл `.env` на основе `.env.example`:
+```bash
+cp .env.example .env
+```
+
+3. Отредактируйте файл `.env`, указав необходимые значения.
+
+4. Запустите бота с использованием Docker Compose:
+```bash
+docker-compose up -d
+```
+
+5. Просмотр логов:
+```bash
+docker-compose logs -f
+```
+
+6. Остановка бота:
+```bash
+docker-compose down
+```
+
+## Установка без Docker
+
+1. Клонируйте репозиторий:
+```bash
+git clone https://github.com/Allexndr/Ozon_parser.git
+cd Ozon_parser
 ```
 
 2. Создайте виртуальное окружение и установите зависимости:
@@ -33,14 +63,9 @@ pip install -r requirements.txt
 cp .env.example .env
 ```
 
-4. Отредактируйте файл `.env`, указав необходимые значения:
-- `TELEGRAM_BOT_TOKEN` - токен вашего Telegram бота
-- `ADMIN_TELEGRAM_ID` - ваш Telegram ID для административных функций
-- `CAPTCHA_API_KEY` - ключ API сервиса капчи
-- Остальные настройки по необходимости
+4. Отредактируйте файл `.env`, указав необходимые значения.
 
-## Запуск
-
+5. Запуск:
 ```bash
 python run.py
 ```
