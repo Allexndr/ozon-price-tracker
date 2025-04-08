@@ -7,6 +7,7 @@ import base64
 import random
 import requests
 import urllib.parse
+import asyncio
 from typing import Dict, List, Optional, Tuple, Union, Any
 from datetime import datetime
 from loguru import logger
@@ -23,6 +24,7 @@ from app.parser.ozon_captcha_solver import OzonCaptchaSolver
 from app.utils.user_agent import get_random_user_agent
 from app.utils.filter_utils import FilterManager
 from app.utils.proxy_handler import ProxyHandler
+from app.bot.bot import send_message
 
 # Добавляем класс ProductInfo для обратной совместимости
 class ProductInfo:
@@ -102,6 +104,10 @@ class OzonParser:
         self.is_driver_active = False
         
         logger.info(f"OzonParser инициализирован (headless: {headless}, proxy: {proxy})")
+        
+        self.is_running = False
+        self.load_items()
+        self.load_ignore_list()
     
     def __del__(self):
         """
@@ -2125,3 +2131,64 @@ class OzonParser:
         except Exception as e:
             logger.exception(f"Ошибка при извлечении цены товара по артикулу {article}: {e}")
             return {"price": 0, "currency": "RUB"}
+
+    def load_items(self):
+        """Загрузка товаров из list.txt"""
+        self.items = []
+        if os.path.exists("list.txt"):
+            with open("list.txt", "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if line:
+                        parts = line.split(",")
+                        if len(parts) >= 2:
+                            name = parts[0].strip()
+                            price = float(parts[1].strip())
+                            self.items.append({"name": name, "price": price})
+
+    def load_ignore_list(self):
+        """Загрузка игнор-списка из ignore_list.txt"""
+        self.ignore_words = set()
+        if os.path.exists("ignore_list.txt"):
+            with open("ignore_list.txt", "r", encoding="utf-8") as f:
+                for line in f:
+                    word = line.strip()
+                    if word:
+                        self.ignore_words.add(word.lower())
+
+    async def start_work(self):
+        """Запуск парсера"""
+        self.is_running = True
+        while self.is_running:
+            # Перезагружаем списки перед каждой итерацией
+            self.load_items()
+            self.load_ignore_list()
+            
+            for item in self.items:
+                if not self.is_running:
+                    break
+                    
+                try:
+                    # Поиск товара
+                    result = await self.search_item(item)
+                    if result:
+                        # Отправляем уведомление через бота
+                        message = (
+                            f"🎯 Найден товар!\n\n"
+                            f"📦 {result['name']}\n"
+                            f"💰 Цена: {result['price']} {result['currency']}\n"
+                            f"🔗 {result['url']}"
+                        )
+                        await send_message(text=message)
+                except Exception as e:
+                    logger.error(f"Error processing item {item}: {e}")
+                
+                # Пауза между запросами
+                await asyncio.sleep(5)
+            
+            # Пауза между итерациями
+            await asyncio.sleep(300)  # 5 минут
+
+    def stop_work(self):
+        """Остановка парсера"""
+        self.is_running = False
