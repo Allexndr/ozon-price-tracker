@@ -1,7 +1,10 @@
 import os
 import tkinter as tk
 from tkinter import ttk
+<<<<<<< HEAD
 import json
+=======
+>>>>>>> khan
 
 MAX_ROWS = 10
 
@@ -9,8 +12,13 @@ MAX_ROWS = 10
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
+<<<<<<< HEAD
         self.title("Ozon Parser - Добавление товаров")
         self.geometry("600x400")
+=======
+        self.title("GUI для товаров")
+        self.geometry("500x400")
+>>>>>>> khan
 
         self.notebook = ttk.Notebook(self)
         self.notebook.pack(fill="both", expand=True)

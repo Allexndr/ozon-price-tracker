@@ -1,31 +1,23 @@
 #!/usr/bin/env python3
 """
-Run script for the Ozon Parser Bot
+Главный файл для запуска бота и GUI
 """
-
-import sys
 import asyncio
 import threading
-from dotenv import load_dotenv
-from app.bot.bot import start_bot
 from gui.app import start_gui_app
-
-# Загружаем переменные окружения из файла .env
-load_dotenv()
+from app.bot.bot import start_bot
 
 def run_gui():
-    """Запускает GUI в отдельном потоке"""
+    """Запуск GUI в отдельном потоке"""
     start_gui_app()
 
 if __name__ == "__main__":
+    # Создаем поток для GUI и запускаем его
+    gui_thread = threading.Thread(target=run_gui, daemon=True)
+    gui_thread.start()
+    
+    # Запускаем бота в основном потоке
     try:
-        # Запускаем GUI в отдельном потоке
-        gui_thread = threading.Thread(target=run_gui)
-        gui_thread.daemon = True  # Поток завершится вместе с основной программой
-        gui_thread.start()
-        
-        # Запускаем бота в основном потоке
         asyncio.run(start_bot())
     except KeyboardInterrupt:
-        print("\nBot stopped by user")
-        sys.exit(0)
+        print("\nБот остановлен пользователем")
