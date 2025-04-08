@@ -1,23 +1,15 @@
 #!/usr/bin/env python3
 """
-Главный файл для запуска бота и GUI
+Simple script to run Ozon parser
 """
 import asyncio
-import threading
-from gui.app import start_gui_app
-from app.bot.bot import start_bot
+from app.parser.ozon_parser import OzonParser
 
-def run_gui():
-    """Запуск GUI в отдельном потоке"""
-    start_gui_app()
+async def main():
+    """Main function to run the parser"""
+    parser = OzonParser()
+    await parser.start_parse()
 
 if __name__ == "__main__":
-    # Создаем поток для GUI и запускаем его
-    gui_thread = threading.Thread(target=run_gui, daemon=True)
-    gui_thread.start()
-    
-    # Запускаем бота в основном потоке
-    try:
-        asyncio.run(start_bot())
-    except KeyboardInterrupt:
-        print("\nБот остановлен пользователем")
+    # Run the parser
+    asyncio.run(main())

@@ -1,16 +1,28 @@
-# config.py
+"""
+Configuration settings for the application
+"""
 import os
+import logging
 from pathlib import Path
 from dotenv import load_dotenv
-from loguru import logger
 
-# Загружаем переменные окружения из .env файла
+# Load environment variables
 load_dotenv()
 
+# Configure logging
+logging.basicConfig(
+    filename="logs/app.log",
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)-8s | %(name)s:%(funcName)s:%(lineno)d - %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S"
+)
+
+# Create logger
+logger = logging.getLogger(__name__)
+
 # Настройки Telegram-бота
-TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
-if not TELEGRAM_BOT_TOKEN:
-    raise ValueError("TELEGRAM_BOT_TOKEN не установлен. Добавьте его в .env файл.")
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+ADMIN_ID = int(os.getenv("ADMIN_ID", 0))
 
 # Настройки периодического поиска товаров
 SCHEDULED_SEARCH_ENABLED = os.getenv("SCHEDULED_SEARCH_ENABLED", "False").lower() == "true"
@@ -56,4 +68,20 @@ CHROME_EXECUTABLE_PATH = os.getenv("CHROME_EXECUTABLE_PATH", "")  # Путь к 
 
 # Настройки бота
 MAX_ITEMS_PER_USER = 100  # Максимальное количество товаров для одного пользователя
-DAILY_WORD_UPDATE_HOUR = 0  # Час обновления стоп-слова (0-23) 
+DAILY_WORD_UPDATE_HOUR = 0  # Час обновления стоп-слова (0-23)
+
+# Parser settings
+OZON_API_KEY = os.getenv("OZON_API_KEY")
+CAPTCHA_API_KEY = os.getenv("CAPTCHA_API_KEY")
+
+# Cache settings
+CACHE_TTL = 1800  # 30 minutes 
+
+# Configure logging
+logger.add(
+    "logs/app.log",
+    rotation="1 day",
+    retention="7 days",
+    level="INFO",
+    format="{time:YYYY-MM-DD HH:mm:ss.SSS} | {level: <8} | {name}:{function}:{line} - {message}"
+) 
