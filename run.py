@@ -1,23 +1,33 @@
 #!/usr/bin/env python3
 """
-Главный файл для запуска бота и GUI
+Simple script to run Ozon parser
 """
 import asyncio
-import threading
-from gui.app import start_gui_app
-from app.bot.bot import start_bot
+import os
+import sys
+from app.parser.ozon_parser import OzonParser
+from app.parser.captcha_solver import TwoCaptchaSolver
 
-def run_gui():
-    """Запуск GUI в отдельном потоке"""
-    start_gui_app()
+async def main():
+    """Main function to run the parser"""
+    # Get API key from environment variable or use empty string
+    captcha_api_key = os.environ.get('CAPTCHA_API_KEY', '')
+    
+    # Initialize CAPTCHA solver if API key is provided
+    captcha_solver = None
+    if captcha_api_key:
+        captcha_solver = TwoCaptchaSolver(api_key=captcha_api_key)
+        print("CAPTCHA solver initialized")
+    else:
+        print("No CAPTCHA API key provided. CAPTCHA solving will not be available.")
+    
+    # Initialize parser with CAPTCHA solver
+    parser = OzonParser(captcha_solver=captcha_solver)
+    
+    # Start parsing
+    print("Starting parser...")
+    await parser.start_parse()
 
 if __name__ == "__main__":
-    # Создаем поток для GUI и запускаем его
-    gui_thread = threading.Thread(target=run_gui, daemon=True)
-    gui_thread.start()
-    
-    # Запускаем бота в основном потоке
-    try:
-        asyncio.run(start_bot())
-    except KeyboardInterrupt:
-        print("\nБот остановлен пользователем")
+    # Run the parser
+    asyncio.run(main())
